@@ -22,4 +22,3 @@ for id in site_id:
     url = f"https://my.imperva.com/api/prov/v2/sites/{id}/customCertificate"
     response = requests.request("PUT", url, headers=headers, json=payload)
     print(response.text)
-
