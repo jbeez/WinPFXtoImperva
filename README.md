@@ -9,3 +9,5 @@ Requirements:
 A successful result will show a timestamp string with the certificate expiry along with error check results.
 
 To-Do: Write fully in python, but I think the python environment on our enterprise windows laptops is very limited and lacking openssl features.
+
+Have python script prompt for values not set if batch file not used.
