@@ -83,5 +83,13 @@ if not sid:
 for id in site_id.split(' '):
     url = f"https://my.imperva.com/api/prov/v2/sites/{id}/customCertificate"
     response = requests.request("PUT", url, headers=headers, json=payload)
-    print(response.text)
-    print("Certificate installed for", domain)
+    jsonResponse = response.json()
+    if jsonResponse["res_message"] == "OK":
+            print("Certificate installed for", domain)
+    else:
+            print("Status: ", jsonResponse["res_message"])
+            jdebug = jsonResponse["debug_info"]
+            for key in jdebug:
+                    if key != "id-info":
+                            print(key, ":", jdebug[key])
+
