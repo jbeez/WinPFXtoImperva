@@ -21,4 +21,4 @@ echo.
 pause
 cls
 
-python3 PemAndKeyToImperva.py %~n1
+python PemAndKeyToImperva.py %~n1
