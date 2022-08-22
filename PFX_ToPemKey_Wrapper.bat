@@ -16,8 +16,6 @@ echo.
 echo.
 echo Invoking python script to upload %~n1.pem to Imperva
 echo.
-echo Press Enter to continue
-echo.
 pause
 cls
 
