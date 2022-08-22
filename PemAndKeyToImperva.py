@@ -19,10 +19,12 @@ domain = (sys.argv[1])
 
 #Set site_id if given on the command line
 if len(sys.argv) >2:
-        site_id = int(sys.argv[2])
-        with open('sites/{}.site_id'.format(domain), 'x') as f:
-                f.write(str(site_id))
-        f.close()
+        site_id = (sys.argv[2])
+        sid = os.path.isfile('sites/{}.site_id'.format(domain))
+        if not 'sid' in locals():
+                with open('sites/{}.site_id'.format(domain), 'x') as f:
+                        f.write(str(site_id))
+                f.close()
 
 #Set pw if supplied on command line
 if len(sys.argv) >3:
