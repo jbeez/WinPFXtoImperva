@@ -58,6 +58,12 @@ payload = {
   "auth_type": "RSA"
 }
 
+#create sites directory in current directory if it doesn't exist
+dirname = ("sites")
+dir = os.path.isdir(dirname)
+if not dir:
+        os.makedirs(dirname)
+
 #write out the site_id file if it doesn't exist
 if not sid:
         with open ('sites/{}.site_id'.format(domain), 'x') as f:
