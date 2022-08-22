@@ -27,7 +27,6 @@ if len(sys.argv) >2:
 #Set pw if supplied on command line
 if len(sys.argv) >3:
         pw = (sys.argv[3])
-        print(pw)
 
 #Check if pw is set, if not prompt for it
 if not 'pw' in locals():
