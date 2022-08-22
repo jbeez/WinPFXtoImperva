@@ -18,5 +18,5 @@ echo Invoking python script to upload %~n1.pem to Imperva
 echo.
 pause
 cls
-
 python PemAndKeyToImperva.py %~n1
+pause
