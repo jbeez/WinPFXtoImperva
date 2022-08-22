@@ -41,18 +41,10 @@ if not 'site_id' in locals():
         else:
                        site_id = input('Enter Numerical SiteID: ')
 
-#Check for pfx file, if doesn't exist use pem and key            
+#Check for pem file, if doesn't exist use pfx            
 #convert to b64 encoded strings for upload            
-pfxfile = os.path.isfile('{}.pfx'.format(domain))
-if pfxfile:
-  with open('{}.pfx'.format(domain), "rb") as mycert:
-     b64c = base64.b64encode(mycert.read()).decode('utf-8')
-  payload = {
-    "certificate": b64c,
-    "passphrase": pw,
-    "auth_type": "RSA"
-    }
-else:
+pemfile = os.path.isfile('{}.pem'.format(domain))
+if pemfile:
   with open('{}.pem'.format(domain), "rb") as mycert:
      b64c = base64.b64encode(mycert.read()).decode('utf-8')
   with open('{}.key'.format(domain), "rb") as mycert:
@@ -63,8 +55,15 @@ else:
     "private_key": pk,
     "auth_type": "RSA"
     }
+else:
+  with open('{}.pfx'.format(domain), "rb") as mycert:
+     b64c = base64.b64encode(mycert.read()).decode('utf-8')
+  payload = {
+    "certificate": b64c,
+    "passphrase": pw,
+    "auth_type": "RSA"
+    }
 
-  
 #Add in API ID and Key from apikey.py file
 from apikey import headers
 
