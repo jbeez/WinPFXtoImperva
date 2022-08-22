@@ -66,7 +66,7 @@ payload = {
   "auth_type": "RSA"
 }
 
-for id in site_id:
+for id in site_id.split(' '):
     url = f"https://my.imperva.com/api/prov/v2/sites/{id}/customCertificate"
     response = requests.request("PUT", url, headers=headers, json=payload)
     print(response.text)
