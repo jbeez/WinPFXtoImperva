@@ -20,11 +20,6 @@ domain = (sys.argv[1])
 #Set site_id if given on the command line
 if len(sys.argv) >2:
         site_id = (sys.argv[2])
-        sid = os.path.isfile('sites/{}.site_id'.format(domain))
-        if not 'sid' in locals():
-                with open('sites/{}.site_id'.format(domain), 'x') as f:
-                        f.write(str(site_id))
-                f.close()
 
 #Set pw if supplied on command line
 if len(sys.argv) >3:
@@ -45,10 +40,6 @@ if not 'site_id' in locals():
                   site_id = site_id + i
         else:
                        site_id = input('Enter Numerical SiteID: ')
-                       with open ('sites/{}.site_id'.format(domain), 'x') as f:
-                               f.write(str(site_id))
-                       f.close()
-
 
 #Convert PEM and KEY to base64 strings to upload to Imperva
 with open('{}.pem'.format(domain), "rb") as mycert:
@@ -66,6 +57,12 @@ payload = {
   "private_key": pk,
   "auth_type": "RSA"
 }
+
+#write out the site_id file if it doesn't exist
+if not sid:
+        with open ('sites/{}.site_id'.format(domain), 'x') as f:
+                f.write(str(site_id))
+        f.close()
 
 for id in site_id.split(' '):
     url = f"https://my.imperva.com/api/prov/v2/sites/{id}/customCertificate"
