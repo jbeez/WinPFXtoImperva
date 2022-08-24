@@ -10,6 +10,12 @@ from urllib.request import getproxies
 #Add in API ID and Key from apikey.py file
 from apikey import headers, accountID
 
+try:
+    import winreg
+except ImportError:
+    pass
+
+
 
 async def main():
     title = 'Imperva Cert Upload'
@@ -78,7 +84,7 @@ async def main():
     if not args.site_id:
         args.site_id = await find_site_id(args.domain)
         if not args.site_id:
-            print("Provide a valid `domain` or `site_id`")
+            print("Provide a valid `domain` or `site_id` next time")
             happy_fun_times()
             return False
 
@@ -128,12 +134,20 @@ async def upload_cert(site_id, payload):
 def get_proxies():
     # get local proxies (if any)
     dirty_proxies = getproxies()
+    print(f"Dirty Proxies: {dirty_proxies}")
     clean_proxies = {}
     for proxy in dirty_proxies:
         if not proxy.endswith('://'):
             clean_proxies[f'{proxy}://'] = dirty_proxies[proxy]
         else:
             clean_proxies[proxy] = dirty_proxies[proxy]
+
+    try:
+        internetSettings = winreg.OpenKey(winreg.HKEY_CURRENT_USER,
+            r'Software\Microsoft\Windows\CurrentVersion\Internet Settings')
+        print(f"Internet Settings: {internetSettings}")
+    except OSError as e:
+        print(f"Failed to read registry: {e}")
 
     return clean_proxies
 
