@@ -1,10 +1,11 @@
 import asyncio
+import textwrap
 from getpass import getpass
 import httpx
-import requests
 import base64
 import sys
 import argparse
+from urllib.request import getproxies
 
 #Add in API ID and Key from apikey.py file
 from apikey import headers, accountID
@@ -56,7 +57,6 @@ async def main():
         required=False,
     )
     args = p.parse_args()
-    print(f"Args: {args}")
 
     if not hasattr(args, 'pfx_file') and not hasattr(args, 'key_file'):
         print("**You must specify either `pfx` or `key`**\n")
@@ -72,21 +72,31 @@ async def main():
     payload = read_certstore(args)
     if not payload:
         # if we couldn't read in the files, exit
+        happy_fun_times()
         return False
 
     if not args.site_id:
         args.site_id = await find_site_id(args.domain)
         if not args.site_id:
             print("Provide a valid `domain` or `site_id`")
+            happy_fun_times()
             return False
 
-    upload_cert(args.site_id, payload)
+    await upload_cert(args.site_id, payload)
 
 
 async def get_page(session, url):
-    resp = await session.post(url)
     try:
+        resp = await session.post(url)
         json_response = resp.json()
+    except TimeoutError as e:
+        print(f"\t-> Timeout connecting to -> ({url})")
+        return []
+
+    except httpx.ConnectError as e:
+        print(f"\t-> Connection failure to -> ({url})")
+        return []
+
     except Exception as e:
         print(f"\t-> Error: {resp.text}({resp.status_code})")
         return []
@@ -98,10 +108,40 @@ async def get_page(session, url):
     return json_response['sites']
 
 
-#function to poll imperva to pull the site_id
+async def upload_cert(site_id, payload):
+    print(f"Uploading Certificate for [{site_id}]")
+    async with httpx.AsyncClient(base_url="https://my.imperva.com/api/prov/v2/sites", headers=headers, proxies=proxies) as session:
+        url = f'{site_id}/customCertificate'
+        resp = await session.put(url, json=payload)
+        json_response = resp.json()
+
+    if json_response["res_message"] == "OK":
+        print(f"\t-> Certificate successfully installed for [{site_id}]")
+    else:
+        print("Status: ", json_response["res_message"])
+        jdebug = json_response["debug_info"]
+        for key in jdebug:
+            if key != "id-info":
+                print(f'\t{key}:{jdebug[key]}')
+
+
+def get_proxies():
+    # get local proxies (if any)
+    dirty_proxies = getproxies()
+    clean_proxies = {}
+    for proxy in dirty_proxies:
+        if not proxy.endswith('://'):
+            clean_proxies[f'{proxy}://'] = dirty_proxies[proxy]
+        else:
+            clean_proxies[proxy] = dirty_proxies[proxy]
+
+    return clean_proxies
+
+
 async def find_site_id(domain):
+    # function to poll imperva to pull the site_id
     print(f"Looking up siteID for [{domain}]...")
-    async with httpx.AsyncClient(base_url="https://my.imperva.com/api/prov/v1/sites", headers=headers) as session:
+    async with httpx.AsyncClient(base_url="https://my.imperva.com/api/prov/v1/sites", headers=headers, proxies=proxies) as session:
         pages = []
         for page in range(0,4):
             url = f'/list?account_id={accountID}&page_size=100&page_num={page}'
@@ -158,22 +198,17 @@ def read_certstore(args):
     return payload
 
 
-def upload_cert(site_id, payload):
-    #Upload the certificate
-    url = f"https://my.imperva.com/api/prov/v2/sites/{site_id}/customCertificate"
-    response = requests.request("PUT", url, headers=headers, json=payload)
-    jsonResponse = response.json()
-    if jsonResponse["res_message"] == "OK":
-        print(f"Certificate installed for [{site_id}]")
-    else:
-        print("Status: ", jsonResponse["res_message"])
-        jdebug = jsonResponse["debug_info"]
-        for key in jdebug:
-            if key != "id-info":
-                print(key, ":", jdebug[key])
+def happy_fun_times():
+    smile = """
+    RXJyb3I=
+    """
+    print(base64.b64decode(smile).decode('utf-8'))
 
 
 if __name__ == "__main__":
+    proxies = get_proxies()
+    print(f"Proxies: {proxies}")
+
     # Hack for issues with Windows event loop
     if sys.version_info[0] == 3 and sys.version_info[1] >= 8 and sys.platform.startswith('win'):
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
