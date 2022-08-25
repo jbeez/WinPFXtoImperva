@@ -1,11 +1,11 @@
 import asyncio
-import textwrap
 from getpass import getpass
 import httpx
 import base64
 import sys
 import argparse
 from urllib.request import getproxies
+from requests.utils import get_environ_proxies
 
 #Add in API ID and Key from apikey.py file
 from apikey import headers, accountID
@@ -134,7 +134,9 @@ async def upload_cert(site_id, payload):
 def get_proxies():
     # get local proxies (if any)
     dirty_proxies = getproxies()
+    dirty_proxies2 = get_environ_proxies()
     print(f"Dirty Proxies: {dirty_proxies}")
+    print(f"Dirty Proxies2: {dirty_proxies2}")
     clean_proxies = {}
     for proxy in dirty_proxies:
         if not proxy.endswith('://'):
