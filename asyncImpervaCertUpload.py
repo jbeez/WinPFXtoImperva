@@ -18,7 +18,7 @@ except ImportError:
 
 
 async def main():
-    title = 'Imperva Cert Upload'
+    title = 'Imperva Script Upload'
     footer = 'Must be called with either `pfx` or `key` options'
 
     p = argparse.ArgumentParser(description=title, epilog=footer, add_help=True)
@@ -92,6 +92,9 @@ async def main():
 
 
 async def get_page(session, url):
+    dirty_proxies2 = get_environ_proxies(url)
+    print(f"Dirty Proxies2: {dirty_proxies2}")
+
     try:
         resp = await session.post(url)
         json_response = resp.json()
@@ -134,9 +137,7 @@ async def upload_cert(site_id, payload):
 def get_proxies():
     # get local proxies (if any)
     dirty_proxies = getproxies()
-    dirty_proxies2 = get_environ_proxies()
     print(f"Dirty Proxies: {dirty_proxies}")
-    print(f"Dirty Proxies2: {dirty_proxies2}")
     clean_proxies = {}
     for proxy in dirty_proxies:
         if not proxy.endswith('://'):
@@ -219,7 +220,6 @@ def happy_fun_times():
     RXJyb3I=
     """
     print(base64.b64decode(smile).decode('utf-8'))
-
 
 if __name__ == "__main__":
     proxies = get_proxies()
